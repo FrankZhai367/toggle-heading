@@ -134,7 +134,7 @@ function init() {
   groups.forEach(item => {
     var { heading: it, children } = item;
     it.classList.toggle("collapsed");
-    if (window.executed) {
+    if (!window.executed) {
       it.addEventListener("click", () => {
         it.classList.toggle("collapsed");
         children.forEach(subIt => {
