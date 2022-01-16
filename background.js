@@ -1,4 +1,5 @@
 function init() {
+ 
   const addStyle = (styles) => {
     /* Create style element */
     var css = document.createElement("style");
@@ -133,17 +134,22 @@ function init() {
   groups.forEach(item => {
     var { heading: it, children } = item;
     it.classList.toggle("collapsed");
-    it.addEventListener("click", () => {
-      it.classList.toggle("collapsed");
-      children.forEach(subIt => {
-        subIt.classList.toggle("hidden");
-      })
-    });
+    if (window.executed) {
+      it.addEventListener("click", () => {
+        it.classList.toggle("collapsed");
+        children.forEach(subIt => {
+          subIt.classList.toggle("hidden");
+        })
+      });
+    }
 
     children.forEach(subIt => {
       subIt.classList.toggle("hidden");
     })
   })
+
+  console.log('window.executed', window.executed);
+  window.executed = true;
 }
 
 chrome.action.onClicked.addListener((tab) => {
