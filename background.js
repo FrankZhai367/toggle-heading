@@ -3,10 +3,10 @@ function init() {
     /* Create style element */
     var css = document.createElement("style");
     css.type = "text/css";
-  
+
     if (css.styleSheet) css.styleSheet.cssText = styles;
     else css.appendChild(document.createTextNode(styles));
-  
+
     /* Append style to the head element */
     document.getElementsByTagName("head")[0].appendChild(css);
   }
@@ -51,27 +51,99 @@ function init() {
     display: none;
   }
   `);
-  var headers = Array.from(document.querySelectorAll("h1,h2,h3,h4,h5"));
-  var first = headers[0];
-  var parent = first.parentNode;
-  var allChildren = Array.from(parent.children);
-  var headerReg = /^H\d$/;
-  allChildren.forEach((it, idx) => {
-    if (headerReg.test(it.tagName)) {
-      it.classList.toggle("collapsed");
-      it.addEventListener("click", () => {
-        // siblings to be invisible
-        it.classList.toggle("collapsed");
-        var nxt = it.nextElementSibling;
-        while (!!nxt && !headerReg.test(nxt.tagName)) {
-          nxt = nxt.nextElementSibling;
-          nxt.classList.toggle("hidden");
-        }
-      });
-    } else {
-      it.classList.toggle("hidden");
+
+  const getPath = (elm) => {
+    var curr = elm.parentNode;
+    var path = [elm];
+    while(curr.tagName != 'BODY') {
+      path.unshift(curr);
+      curr = curr.parentNode;
     }
-  });
+    return path;
+  }
+
+  const getParentInCommon = (elm1, elm2) => {
+    var path1 = getPath(elm1);
+    var path2 = getPath(elm2);
+    while(path1.length && path2.length) {
+      var it1 = path1[0];
+      var it2 = path2[0];
+      if (it1 !== it2) {
+        break;
+      }
+      it1 = path1.shift();
+      it2 = path2.shift();
+    }
+    return [path1, path2]
+  }
+  const getSiblingsDown = (path, path2Parent) => {
+    var siblings = []
+    while(path.length) {
+      var node = path.pop();
+      var nxt = node.nextElementSibling;
+      while (nxt) {
+        if (nxt == path2Parent) {
+          break;
+        }
+        siblings.push(nxt);
+        nxt = nxt.nextElementSibling;
+      }
+    }
+    return siblings;
+  }
+  const getSiblingsUp = (path, path1Parent) => {
+    var siblings = []
+    while(path.length) {
+      var node = path.pop();
+      var prev = node.previousElementSibling;
+      while (prev) {
+        if (prev == path1Parent) {
+          break;
+        }
+        siblings.push(prev);
+        prev = prev.previousElementSibling;
+      }
+    }
+    return siblings;
+  }
+
+  const groupByHeading = (headings) => {
+    return headings.reduce((res, it, idx) => {
+      var children = [];
+      var heading = it;
+      if (idx !== headings.length - 1) {
+        var nxt = headings[idx + 1];
+        var [pathCurr, pathNxt] = getParentInCommon(it, nxt);
+        var [path1Parent, path2Parent] = [pathCurr[0], pathNxt[0]]
+        var downs = new Set(getSiblingsDown(pathCurr, path2Parent));
+        var ups = getSiblingsUp(pathNxt, path1Parent);
+        ups.forEach(up => {
+          downs.add(up);
+        })
+        children = [...downs];
+      } else {
+        children = getSiblingsDown(getPath(it), document.body)
+      }
+      res.push({ children, heading });
+      return res;
+    }, [])
+  }
+  var headers = Array.from(document.querySelectorAll("h1,h2,h3,h4,h5"));
+  var groups = groupByHeading(headers);
+  groups.forEach(item => {
+    var { heading: it, children } = item;
+    it.classList.toggle("collapsed");
+    it.addEventListener("click", () => {
+      it.classList.toggle("collapsed");
+      children.forEach(subIt => {
+        subIt.classList.toggle("hidden");
+      })
+    });
+
+    children.forEach(subIt => {
+      subIt.classList.toggle("hidden");
+    })
+  })
 }
 
 chrome.action.onClicked.addListener((tab) => {
