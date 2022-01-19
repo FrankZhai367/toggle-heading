@@ -5,7 +5,6 @@
   "description": "Making headings collapsed",
   "permissions": [
     "storage",
-    "notifications",
     "bookmarks",
     "activeTab",
     "scripting"

@@ -50,6 +50,7 @@ function init() {
 
   .fr-checkbox {
     cursor: pointer;
+    margin-right: 8px;
   }
 
   .fr-hidden {
@@ -91,6 +92,7 @@ function init() {
     background: peachpuff;
     color: maroon;
     position: fixed;
+    z-index: 999;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
@@ -220,8 +222,7 @@ function init() {
         url: location.href
       });
     }
-    // 保存数据到localStorage，名字：fr-data
-    localStorage.setItem('fr-data', JSON.stringify(window.frData));
+    setStoreData();
   }
 
   function renderStatus() {
@@ -329,6 +330,21 @@ function init() {
     }, [])
   }
 
+  function getStoreData() {
+    var allData = JSON.parse(localStorage.getItem('fr-data'));
+    if (allData) {
+      return allData[location.href] || {};
+    }
+    return {}
+  }
+
+  function setStoreData() {
+    var allData = JSON.parse(localStorage.getItem('fr-data')) || {};
+    allData[location.href] = window.frData;
+    // 保存数据到localStorage，名字：fr-data
+    localStorage.setItem('fr-data', JSON.stringify(allData));
+  }
+
   if (!window.executed) {
     // 第二次点击的时候，不需要再做这些事了
     chrome.bookmarks = {
@@ -363,7 +379,7 @@ function init() {
     var headers = Array.from(document.querySelectorAll("h1,h2,h3,h4,h5"));
     var pathMap = window.pathMap = new Map();
     // 从localStorage fr-data种获取数据
-    window.frData = JSON.parse(localStorage.getItem('fr-data') || '{}');
+    window.frData = getStoreData();
     window.frData.all = headers.length;
     window.frData.done = 0;
     headers.forEach((heading) => {
