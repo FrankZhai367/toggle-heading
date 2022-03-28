@@ -1,7 +1,7 @@
 {
   "name": "Toggle Heading",
   "manifest_version": 3,
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Making headings collapsed",
   "permissions": [
     "storage",
