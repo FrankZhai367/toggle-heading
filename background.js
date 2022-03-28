@@ -1,7 +1,7 @@
 function init() {
 
   function addStyle(styles) {
-    /* Create style element */
+    /* Create style element 21 */
     var css = document.createElement("style");
     css.type = "text/css";
 
@@ -19,8 +19,17 @@ function init() {
   h5 {
     display: flex;
     align-items: center;
-    position: relative;
+    position: sticky;
     cursor: pointer;
+    top: 0;
+    background: white;
+  }
+  h1.fr-active,
+  h2.fr-active,
+  h3.fr-active,
+  h4.fr-active,
+  h5.fr-active {
+    position: relative;
   }
   h1::before,
   h2::before,
@@ -50,7 +59,7 @@ function init() {
 
   .fr-checkbox {
     cursor: pointer;
-    margin-right: 8px;
+    margin-right: 18px;
   }
 
   .fr-hidden {
@@ -71,6 +80,7 @@ function init() {
     background: peachpuff;
     border-width: 0;
     border-radius: 4px;
+    padding: 0 6px;
   }
   .fr-read-later-btn .fr-status {
     color: maroon;
@@ -284,7 +294,14 @@ function init() {
 
   function checkboxChange(e, xPath) {
     e.stopPropagation && e.stopPropagation();
-    window.frData[xPath] = e.target.checked;
+    const { checked } = e.target;
+    window.frData[xPath] = checked;
+    let heading = e.target.parentNode;
+    if (checked) {
+      heading.classList.add('fr-active');
+    } else {
+      heading.classList.remove('fr-active');
+    }
     if (window.frData[xPath]) {
       window.frData.done++;
     } else {
@@ -303,6 +320,9 @@ function init() {
     // 选中相应的checkbox, 调用updateBookmark函数
     ck.addEventListener('click', (e) => checkboxChange(e, xPath))
     heading.insertBefore(ck, heading.childNodes[0])
+    if (ck.checked) {
+      heading.classList.add('fr-active');
+    }
   }
 
   function groupByHeading(headings) {
